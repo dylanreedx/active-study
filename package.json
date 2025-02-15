@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
-    "openai": "^4.85.1"
+    "openai": "^4.85.1",
+    "twilio": "^5.4.4"
   },
   "devDependencies": {
     "@tsconfig/node-lts": "^22.0.1",
