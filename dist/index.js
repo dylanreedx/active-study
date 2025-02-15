@@ -1,3 +1,4 @@
+import cron from 'node-cron';
 import express from 'express';
 import bodyParser from 'body-parser';
 import MessagingResponse from 'twilio/lib/twiml/MessagingResponse.js';
@@ -6,6 +7,8 @@ import { usersTable } from './db/schema.js';
 import 'dotenv/config';
 import { db } from './db/index.js';
 import { eq } from 'drizzle-orm';
+import { buildConversationHistory } from './utils/build-convo-history.js';
+import { sendStudyPrompts } from './utils/cron.js';
 const app = express();
 const port = '3000';
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -13,39 +16,33 @@ console.log('Connected to SQLite DB.');
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
-app.post('/twilio/sms-status', (req, res) => {
-    const { MessageSid, SmsStatus, To, From, ErrorCode, ErrorMessage } = req.body;
-    console.log('Received SMS Event:');
-    console.log(`Message SID: ${MessageSid}`);
-    console.log(`Status: ${SmsStatus}`);
-    console.log(`To: ${To}, From: ${From}`);
-    if (ErrorCode) {
-        console.log(`Error Code: ${ErrorCode}, Message: ${ErrorMessage}`);
-    }
-    res.status(200).send('SMS event received');
-});
+// Handle incoming SMS
 app.post('/sms', async (req, res) => {
     const { Body, From } = req.body;
     console.log('Received SMS from:', From);
-    // Check if the user exists
-    const existingUsers = await db
+    // Retrieve or create user record
+    let userRecord = await db
         .select()
         .from(usersTable)
         .where(eq(usersTable.id, From))
-        .all();
-    if (existingUsers.length === 0) {
+        .get();
+    if (!userRecord) {
         await db.insert(usersTable).values({
             id: From,
             messages: JSON.stringify([Body]),
             responses: JSON.stringify([]),
-            onboarding: 0,
+            studyActive: 0, // 0 indicates refinement phase
         });
+        userRecord = await db
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.id, From))
+            .get();
     }
     else {
-        const user = existingUsers[0];
         let messages = [];
         try {
-            messages = JSON.parse(user.messages || '[]');
+            messages = JSON.parse(userRecord.messages || '[]');
         }
         catch {
             messages = [];
@@ -56,28 +53,41 @@ app.post('/sms', async (req, res) => {
             .set({ messages: JSON.stringify(messages) })
             .where(eq(usersTable.id, From));
     }
-    const response = await InitialResponse(Body);
+    // Build conversation context using the new helper
+    const conversationHistory = buildConversationHistory(userRecord);
+    // Get AI response based on the latest message and history.
+    const responseMessage = await InitialResponse(Body, conversationHistory);
+    // If the response doesn't prompt for clarification, assume topic is specific and mark studyActive as true.
+    if (responseMessage.content &&
+        !responseMessage.content.toLowerCase().includes('STUDY_READY')) {
+        await db
+            .update(usersTable)
+            .set({ studyActive: 1 })
+            .where(eq(usersTable.id, From));
+    }
     const twiml = new MessagingResponse();
-    twiml.message(response.content || 'No response from AI');
-    // Update the responses array
-    const userRecord = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.id, From))
-        .get();
+    twiml.message(responseMessage.content || 'No response from AI');
+    // Append AI response to the user's responses
     let responsesArr = [];
-    try {
-        responsesArr = JSON.parse(userRecord?.responses || '[]');
+    if (userRecord) {
+        try {
+            responsesArr = JSON.parse(userRecord.responses || '[]');
+        }
+        catch {
+            responsesArr = [];
+        }
     }
-    catch {
-        responsesArr = [];
-    }
-    if (response.content) {
-        responsesArr.push(response.content);
+    if (responseMessage.content) {
+        responsesArr.push(responseMessage.content);
     }
     await db
         .update(usersTable)
         .set({ responses: JSON.stringify(responsesArr) })
         .where(eq(usersTable.id, From));
     res.type('text/xml').send(twiml.toString());
+});
+// Cron job: runs every 30 minutes
+cron.schedule('*/2 * * * *', async () => {
+    console.log('Cron job running: sending study prompts.');
+    await sendStudyPrompts();
 });

@@ -4,7 +4,7 @@ export const usersTable = sqliteTable('users', {
   id: text('id').primaryKey(),
   messages: text('messages'),
   responses: text('responses'),
-  onboarding: integer('onboarding'),
+  studyActive: integer('study_active').default(0),
 });
 
 export type InsertUser = typeof usersTable.$inferInsert;
