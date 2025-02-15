@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
 import OpenAI from 'openai';
+import 'dotenv/config';
+
 const openai = new OpenAI({
-  apiKey:
-    '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',
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function InitialResponse(message: string) {

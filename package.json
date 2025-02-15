@@ -13,6 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.39.3",
     "express": "^4.21.2",
     "mongoose": "^8.10.1",
     "openai": "^4.85.1",
@@ -23,6 +26,7 @@
     "@tsconfig/node-lts": "^22.0.1",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.4",
+    "drizzle-kit": "^0.30.4",
     "nodemon": "^3.1.9",
     "typescript": "^5.7.3"
   }

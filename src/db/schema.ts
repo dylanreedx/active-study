@@ -1,15 +1,11 @@
-import mongoose from 'mongoose';
-const {Schema, model} = mongoose;
+import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 
-const userSchema = new Schema({
-  id: {
-    type: String,
-    required: true,
-  },
-  messages: [String],
-  responses: [String],
-  onboarding: Boolean,
+export const usersTable = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  messages: text('messages'),
+  responses: text('responses'),
+  onboarding: integer('onboarding'),
 });
 
-const User = model('User', userSchema);
-export default User;
+export type InsertUser = typeof usersTable.$inferInsert;
+export type SelectUser = typeof usersTable.$inferSelect;
