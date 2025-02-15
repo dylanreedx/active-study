@@ -1,6 +1,7 @@
 {
   "name": "active-study",
   "version": "1.0.0",
+  "type": "module",
   "description": "Use convenient active recall to prepare for your next test.",
   "main": "index.js",
   "scripts": {
@@ -13,7 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
+    "mongoose": "^8.10.1",
     "openai": "^4.85.1",
+    "ts-node": "^10.9.2",
     "twilio": "^5.4.4"
   },
   "devDependencies": {
