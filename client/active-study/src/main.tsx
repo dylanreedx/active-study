@@ -11,10 +11,10 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="active-studies" element={<RootLayout />} >
+        <Route path="/" element={<RootLayout />} >
           <Route index element={<ListActiveStudies />} />
           <Route path='dashboard' element={<Dashboard />} />
-          <Route path='new' element={<CreateActiveStudy />} />        
+          <Route path='new-active-studiy' element={<CreateActiveStudy />} />        
         </Route>
         <Route path="*" element={<ErrorPage/>} />
       </Routes>

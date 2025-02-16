@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { WeekCalendar } from './ui/weekcalendar';
 
 type StudyMaterial = {
   id: string;
@@ -21,6 +22,7 @@ type StudyMaterialsProps = {
 
 export function StudyMaterials({phoneNumber}: StudyMaterialsProps) {
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
 
   useEffect(() => {
     fetch(`/api/study-materials?phoneNumber=${phoneNumber}`)
@@ -35,10 +37,15 @@ export function StudyMaterials({phoneNumber}: StudyMaterialsProps) {
 
   return (
     <div className='space-y-4'>
+      <WeekCalendar selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+
       {materials?.length === 0 ? (
         <p>No study materials available yet.</p>
       ) : (
-        materials?.map((material) => (
+        materials?.filter((material) => {
+          const materialDate = new Date(material.timestamp);
+          return materialDate.getDate() === selectedDay;
+        }).map((material) => (
           <Card key={material.id}>
             <CardHeader>
               <CardTitle>Study Material</CardTitle>
@@ -47,7 +54,9 @@ export function StudyMaterials({phoneNumber}: StudyMaterialsProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>{material.content}</p>
+              {JSON.parse(material.content).map((c: string) =>(
+                <p key={c}>{c}</p>
+              ))}
             </CardContent>
           </Card>
         ))

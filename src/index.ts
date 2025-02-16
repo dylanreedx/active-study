@@ -133,6 +133,30 @@ app.post('/sms', async (req: Request, res: Response) => {
   res.type('text/xml').send(twiml.toString());
 });
 
+// Get all messages for a user
+// app.get('/messages/:id', async (req: Request, res: Response) => {
+//   const { id } = req.params;
+//   const userRecord = await db
+//     .select()
+//     .from(usersTable)
+//     .where(eq(usersTable.id, id))
+//     .get();
+//   if (!userRecord) {
+//     throw new Error('User not found.');
+//   }
+//   let messages: string[] = [];
+//   try {
+//     messages = JSON.parse(userRecord.messages || '[]');
+//   } catch (err) {
+//     console.error(
+//       `[${new Date().toISOString()}] Error parsing messages for ${id}:`,
+//       err
+//     );
+//     messages = [];
+//   }
+//   return res.send(messages);
+// });
+
 // Cron job: runs every 30 minutes (for testing, you might change this to every 2 minutes or every minute)
 cron.schedule('*/5 * * * *', async () => {
   console.log(

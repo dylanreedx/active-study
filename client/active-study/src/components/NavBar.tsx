@@ -5,10 +5,10 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Avatar, Box, Button, Container, Menu, MenuItem, Tooltip } from '@mui/material';
-import AdbIcon from '@mui/icons-material/Adb';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-const pages = ['Products', 'Pricing', 'Blog'];
+const pages = ['Active Studies', 'New Activy Study', 'Dashboard'];
 
 export const NavBar = () => {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -33,7 +33,7 @@ export const NavBar = () => {
       <AppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+            <NotificationsActiveIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
             <Typography
               variant="h6"
               noWrap
@@ -49,7 +49,7 @@ export const NavBar = () => {
                 textDecoration: 'none',
               }}
             >
-              LOGO
+              Active Study
             </Typography>
   
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -86,7 +86,7 @@ export const NavBar = () => {
                 ))}
               </Menu>
             </Box>
-            <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+            <NotificationsActiveIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
             <Typography
               variant="h5"
               noWrap
@@ -103,7 +103,7 @@ export const NavBar = () => {
                 textDecoration: 'none',
               }}
             >
-              LOGO
+              Active Study
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               {pages.map((page) => (
