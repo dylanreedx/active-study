@@ -10,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import Spinner from '../assets/spinner.json';
+import Lottie from "lottie-react";
 
 type AuthProps = {
   onAuthenticated: (phoneNumber: string) => void;
@@ -20,6 +22,7 @@ export function Auth({onAuthenticated}: AuthProps) {
   const [verificationCode, setVerificationCode] = useState('');
   const [step, setStep] = useState<'phone' | 'code'>('phone');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const storedPhoneNumber = localStorage.getItem('phoneNumber');
@@ -47,6 +50,7 @@ export function Auth({onAuthenticated}: AuthProps) {
 
   const handleSendVerification = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/send-verification', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -62,6 +66,8 @@ export function Auth({onAuthenticated}: AuthProps) {
       }
     } catch (error) {
       setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,9 +109,14 @@ export function Auth({onAuthenticated}: AuthProps) {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
-            <Button onClick={handleSendVerification}>
+            {loading ?  <Lottie animationData={Spinner} style={{
+              width: 200,
+              margin: 'auto',
+            }}  />
+            
+            :<Button onClick={handleSendVerification}>
               Send Verification Code
-            </Button>
+            </Button>}
           </div>
         ) : (
           <div className='space-y-4'>
