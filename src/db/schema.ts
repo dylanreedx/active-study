@@ -5,6 +5,9 @@ export const usersTable = sqliteTable('users', {
   messages: text('messages'),
   responses: text('responses'),
   studyActive: integer('study_active').default(0),
+
+  verificationCode: text('verification_code'),
+  verified: integer('verified').default(0),
 });
 
 export type InsertUser = typeof usersTable.$inferInsert;

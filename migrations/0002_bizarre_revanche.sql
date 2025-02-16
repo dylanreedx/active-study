@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `verification_code` text;
