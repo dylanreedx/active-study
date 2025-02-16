@@ -1,4 +1,4 @@
-# Next.js Project Documentation
+# Study Dashboard - Next.js Project Documentation
 
 ## Prerequisites
 Ensure you have the following installed:
@@ -8,6 +8,15 @@ Ensure you have the following installed:
 
 ## Introduction
 Welcome to the Study Dashboard! This tool allows you to manage your study materials efficiently using your phone number. To get started, simply send an SMS to the following phone number: +1 (346) 550-7810. Once you have sent the SMS, you can access and check your study materials at the following address: [https://active-study.vercel.app/](https://active-study.vercel.app/). This dashboard is designed to streamline your study process and keep all your materials organized in one place.
+
+## Tech Stack
+
+- **Next.js**: A React framework for building server-side rendered and statically generated web applications.
+- **React**: A JavaScript library for building user interfaces.
+- **Tailwind CSS**: A utility-first CSS framework for rapidly building custom user interfaces.
+- **TypeScript**: A strongly typed programming language that builds on JavaScript, giving you better tooling at any scale.
+- **Vercel**: A platform for frontend frameworks and static sites, built to integrate with your headless content, commerce, or database.
+
 
 ## Getting Started
 
