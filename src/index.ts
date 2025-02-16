@@ -158,7 +158,7 @@ app.post('/sms', async (req: Request, res: Response) => {
 // });
 
 // Cron job: runs every 30 minutes (for testing, you might change this to every 2 minutes or every minute)
-cron.schedule('*/5 * * * *', async () => {
+cron.schedule('*/30 * * * *', async () => {
   console.log(
     `[${new Date().toISOString()}] Cron job triggered: sending study prompts.`
   );

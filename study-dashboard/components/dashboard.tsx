@@ -28,12 +28,27 @@ export function Dashboard() {
     if (storedPhoneNumber) {
       setAuthenticated(true);
       setPhoneNumber(storedPhoneNumber);
+      fetchStudyStatus(storedPhoneNumber);
     }
   }, []);
+
+  const fetchStudyStatus = async (phone: string) => {
+    try {
+      const response = await fetch(`/api/study-status?phoneNumber=${phone}`);
+      if (response.ok) {
+        const {studyActive, studyTopic} = await response.json();
+        setStudyActive(studyActive);
+        setStudyTopic(studyTopic);
+      }
+    } catch (error) {
+      console.error('Error fetching study status:', error);
+    }
+  };
 
   const handleAuthenticated = (phone: string) => {
     setAuthenticated(true);
     setPhoneNumber(phone);
+    fetchStudyStatus(phone);
   };
 
   const handleStudyToggle = async () => {
@@ -108,6 +123,7 @@ export function Dashboard() {
               <div className='flex items-center space-x-2'>
                 <Switch
                   id='study-mode'
+                  defaultChecked={studyActive}
                   checked={studyActive}
                   onCheckedChange={handleStudyToggle}
                 />
