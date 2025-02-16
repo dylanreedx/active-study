@@ -24,6 +24,7 @@
     "twilio": "^5.4.4"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.8",
     "@tsconfig/node-lts": "^22.0.1",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.4",

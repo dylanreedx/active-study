@@ -1,0 +1,13 @@
+app = "active-study-wispy-star-2239"
+primary_region = "yyz"
+
+[http_service]
+auto_start_machines = true
+auto_stop_machines = "stop"
+force_https = true
+internal_port = 3000
+min_machines_running = 0
+processes = [ "app" ]
+
+[build]
+  dockerfile = "Dockerfile"
