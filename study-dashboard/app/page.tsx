@@ -1,16 +1,20 @@
-import type { Metadata } from "next"
-import { Dashboard } from "@/components/dashboard"
+// make a simple hero section with a modern clean heading and a link to the dashboard
 
-export const metadata: Metadata = {
-  title: "Study Dashboard",
-  description: "Manage your study sessions and view study materials",
-}
+import React from 'react';
+import Link from 'next/link';
+import {Button} from '@/components/ui/button';
 
-export default function DashboardPage() {
+export default function HomePage() {
   return (
-    <div className="container mx-auto py-10">
-      <Dashboard />
+    <div className='min-h-screen flex items-center justify-center bg-background'>
+      <div className='text-center'>
+        <h1 className='text-4xl font-bold text-white mb-4'>
+          Use convenient active recall to prepare for your next test.
+        </h1>
+        <Link href='/dashboard'>
+          <Button>Start Studying</Button>
+        </Link>
+      </div>
     </div>
-  )
+  );
 }
-
