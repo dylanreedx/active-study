@@ -1,6 +1,3 @@
-Here is the raw markdown code for your Next.js project documentation:  
-
-```markdown
 # Next.js Project Documentation
 
 ## Prerequisites
