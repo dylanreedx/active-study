@@ -66,7 +66,7 @@ function WeekCalendar({ selectedDay, setSelectedDay }: WeekCalendarProps) {
               daysOfWeek.map((day) => (
                 <button
                   key={day.toString()}
-                  className={`p-2 ${isToday(day) ? 'bg-gray-200' : ''} ${selectedDay === day.getDate() ? 'bg-blue-200' : ''}`}
+                  className={`p-2 ${isToday(day) ? 'bg-gray-200' : ''} ${selectedDay === day.getDate() ? '!bg-blue-200' : ''}`}
                   onClick={() => selectedDayHandler(day.getDate())}
                   >
                   <div className="flex flex-col items-center">
