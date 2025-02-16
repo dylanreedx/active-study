@@ -11,7 +11,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import Spinner from '../assets/spinner.json';
-import Lottie from "lottie-react";
+import dynamic from 'next/dynamic';
+const Lottie = dynamic(() => import('lottie-react'), {ssr: false});
 
 type AuthProps = {
   onAuthenticated: (phoneNumber: string) => void;
@@ -109,14 +110,19 @@ export function Auth({onAuthenticated}: AuthProps) {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
-            {loading ?  <Lottie animationData={Spinner} style={{
-              width: 200,
-              margin: 'auto',
-            }}  />
-            
-            :<Button onClick={handleSendVerification}>
-              Send Verification Code
-            </Button>}
+            {loading ? (
+              <Lottie
+                animationData={Spinner}
+                style={{
+                  width: 200,
+                  margin: 'auto',
+                }}
+              />
+            ) : (
+              <Button onClick={handleSendVerification}>
+                Send Verification Code
+              </Button>
+            )}
           </div>
         ) : (
           <div className='space-y-4'>
