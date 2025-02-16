@@ -67,4 +67,26 @@ To get started with this project, follow these steps:
 6. **Test the application:**
    You can use tools like Postman to test the endpoints. For example, to test the `/sms` endpoint, send a POST request with the necessary parameters.
 
+## Accessing the Client Folder
+The client folder contains the frontend code for the application. To access the client folder, follow these steps:
+
+1. Navigate to the client folder:
+```sh
+   cd study-dashboard
+```
+
+2. Install dependencies for the client:
+
+```sh
+npm install
+```
+
+3. Run the client application:
+
+```sh
+npm run dev
+```
+
 Now you are ready to use the application to prepare for your next test with convenient active recall!
+
+
