@@ -26,111 +26,123 @@ app.listen(port, () => {
 // Handle incoming SMS
 app.post('/sms', async (req: Request, res: Response) => {
   const {Body, From} = req.body;
-  console.log(
-    `[${new Date().toISOString()}] Received SMS from: ${From} with body: "${Body}"`
-  );
-
-  // Retrieve or create user record
-  let userRecord = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, From))
-    .get();
-
-  if (!userRecord) {
+  if (Body === 'STOP' || Body.contains('STOP')) {
     console.log(
-      `[${new Date().toISOString()}] No user record found for ${From}. Creating new record.`
+      `[${new Date().toISOString()}] Received STOP message from: ${From}. Deleting user record.`
     );
-    await db.insert(usersTable).values({
-      id: From,
-      messages: JSON.stringify([Body]),
-      responses: JSON.stringify([]),
-      studyActive: 0, // 0 indicates refinement phase
-    });
-    userRecord = await db
+    await db
+      .update(usersTable)
+      .set({studyActive: 0})
+      .where(eq(usersTable.id, From));
+  } else {
+    console.log(
+      `[${new Date().toISOString()}] Received SMS from: ${From} with body: "${Body}"`
+    );
+
+    // Retrieve or create user record
+    let userRecord = await db
       .select()
       .from(usersTable)
       .where(eq(usersTable.id, From))
       .get();
-  } else {
-    console.log(
-      `[${new Date().toISOString()}] Found user record for ${From}. Updating messages.`
-    );
-    let messages: string[] = [];
-    try {
-      messages = JSON.parse(userRecord.messages || '[]');
-    } catch (err) {
-      console.error(
-        `[${new Date().toISOString()}] Error parsing messages for ${From}:`,
-        err
+
+    if (!userRecord) {
+      console.log(
+        `[${new Date().toISOString()}] No user record found for ${From}. Creating new record.`
       );
-      messages = [];
+      await db.insert(usersTable).values({
+        id: From,
+        messages: JSON.stringify([Body]),
+        responses: JSON.stringify([]),
+        studyActive: 0, // 0 indicates refinement phase
+      });
+      userRecord = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, From))
+        .get();
+    } else {
+      console.log(
+        `[${new Date().toISOString()}] Found user record for ${From}. Updating messages.`
+      );
+      let messages: string[] = [];
+      try {
+        messages = JSON.parse(userRecord.messages || '[]');
+      } catch (err) {
+        console.error(
+          `[${new Date().toISOString()}] Error parsing messages for ${From}:`,
+          err
+        );
+        messages = [];
+      }
+      messages.push(Body);
+      await db
+        .update(usersTable)
+        .set({messages: JSON.stringify(messages)})
+        .where(eq(usersTable.id, From));
     }
-    messages.push(Body);
+
+    // Build conversation context using the new helper
+    const conversationHistory = buildConversationHistory(userRecord);
+    console.log(
+      `[${new Date().toISOString()}] Conversation history for ${From}:\n${conversationHistory}`
+    );
+
+    // Get AI response based on the latest message and history.
+    const responseMessage = await InitialResponse(Body, conversationHistory);
+    console.log(
+      `[${new Date().toISOString()}] AI response for ${From}: "${
+        responseMessage.content
+      }"`
+    );
+
+    // If the response doesn't prompt for clarification (i.e. no 'STUDY_READY'), mark studyActive as true.
+    if (
+      responseMessage.content &&
+      !responseMessage.content.toLowerCase().includes('study_ready')
+    ) {
+      await db
+        .update(usersTable)
+        .set({studyActive: 1})
+        .where(eq(usersTable.id, From));
+      console.log(
+        `[${new Date().toISOString()}] User ${From} marked as studyActive.`
+      );
+    } else {
+      console.log(
+        `[${new Date().toISOString()}] User ${From} still in refinement phase.`
+      );
+    }
+
+    const twiml = new MessagingResponse();
+    twiml.message(responseMessage.content || 'No response from AI');
+
+    // Append AI response to the user's responses
+    let responsesArr: string[] = [];
+    if (userRecord) {
+      try {
+        responsesArr = JSON.parse(userRecord.responses || '[]');
+      } catch (err) {
+        console.error(
+          `[${new Date().toISOString()}] Error parsing responses for ${From}:`,
+          err
+        );
+        responsesArr = [];
+      }
+    }
+    if (responseMessage.content) {
+      responsesArr.push(responseMessage.content);
+    }
     await db
       .update(usersTable)
-      .set({messages: JSON.stringify(messages)})
+      .set({responses: JSON.stringify(responsesArr)})
       .where(eq(usersTable.id, From));
-  }
 
-  // Build conversation context using the new helper
-  const conversationHistory = buildConversationHistory(userRecord);
-  console.log(
-    `[${new Date().toISOString()}] Conversation history for ${From}:\n${conversationHistory}`
-  );
-
-  // Get AI response based on the latest message and history.
-  const responseMessage = await InitialResponse(Body, conversationHistory);
-  console.log(
-    `[${new Date().toISOString()}] AI response for ${From}: "${
-      responseMessage.content
-    }"`
-  );
-
-  // If the response doesn't prompt for clarification (i.e. no 'STUDY_READY'), mark studyActive as true.
-  if (
-    responseMessage.content &&
-    !responseMessage.content.toLowerCase().includes('study_ready')
-  ) {
-    await db
-      .update(usersTable)
-      .set({studyActive: 1})
-      .where(eq(usersTable.id, From));
     console.log(
-      `[${new Date().toISOString()}] User ${From} marked as studyActive.`
+      `[${new Date().toISOString()}] Sending SMS response to ${From}.`
     );
-  } else {
-    console.log(
-      `[${new Date().toISOString()}] User ${From} still in refinement phase.`
-    );
+    res.type('text/xml').send(twiml.toString());
   }
-
-  const twiml = new MessagingResponse();
-  twiml.message(responseMessage.content || 'No response from AI');
-
-  // Append AI response to the user's responses
-  let responsesArr: string[] = [];
-  if (userRecord) {
-    try {
-      responsesArr = JSON.parse(userRecord.responses || '[]');
-    } catch (err) {
-      console.error(
-        `[${new Date().toISOString()}] Error parsing responses for ${From}:`,
-        err
-      );
-      responsesArr = [];
-    }
-  }
-  if (responseMessage.content) {
-    responsesArr.push(responseMessage.content);
-  }
-  await db
-    .update(usersTable)
-    .set({responses: JSON.stringify(responsesArr)})
-    .where(eq(usersTable.id, From));
-
-  console.log(`[${new Date().toISOString()}] Sending SMS response to ${From}.`);
-  res.type('text/xml').send(twiml.toString());
 });
 
 // Get all messages for a user
